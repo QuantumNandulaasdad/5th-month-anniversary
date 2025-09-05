@@ -45,12 +45,46 @@
     border-radius: 12px;
     box-shadow: 0 0 20px white;
   }
+  /* Tap to Start Overlay */
+  #startOverlay {
+    position: fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    background:#f1bcd4;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    z-index:9999;
+    flex-direction:column;
+  }
+  #startOverlay h2 {
+    color:white;
+    text-shadow:1px 1px 4px black;
+    margin-bottom: 20px;
+  }
+  #startOverlay button {
+    padding:12px 24px;
+    font-size:18px;
+    border:none;
+    border-radius:12px;
+    background:#ff4081;
+    color:white;
+    cursor:pointer;
+  }
 </style>
 </head>
 <body>
   <h1>Ikku's maze <3</h1>
   <canvas id="mazeCanvas"></canvas>
   <div id="popup"></div>
+
+  <!-- Tap to Start Overlay -->
+  <div id="startOverlay">
+    <h2>Tap to Start 💖</h2>
+    <button>Start Game</button>
+  </div>
 
   <!-- 🎵 Hidden audio players -->
   <audio id="winSound" src="sodapop.mp3"></audio>
@@ -68,7 +102,7 @@ let player = {x:0,y:0};
 let exits = [
   {x:mazeSize-1, y:mazeSize-1, color:"pink", type:"image", src:"like.jpg"}, 
   {x:0, y:mazeSize-1, color:"black", type:"youtube", src:"https://www.youtube.com/embed/7ML8jdq3-sA"},
-  {x:mazeSize-1, y:0, color:"red", type:"image", src:"kau.png"} // 🔴 red heart uses uploaded image
+  {x:mazeSize-1, y:0, color:"red", type:"image", src:"kau.png"} 
 ];
 
 // ✅ Full Maze Layout
@@ -191,6 +225,7 @@ function movePlayer(dx,dy) {
   }
 }
 
+// Controls
 window.addEventListener("keydown", e => {
   if (e.key==="ArrowUp"||e.key==="w") movePlayer(0,-1);
   if (e.key==="ArrowDown"||e.key==="s") movePlayer(0,1);
@@ -215,35 +250,24 @@ canvas.addEventListener("touchend", e => {
   }
 });
 
-// ✅ Hybrid audio unlock fix
-function isMobile() {
-  return /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-}
-function unlockAudioOnce() {
+// ✅ Tap to Start unlock audio
+document.querySelector("#startOverlay button").addEventListener("click", () => {
   const winSound = document.getElementById("winSound");
   const pinkSound = document.getElementById("pinkSound");
 
-  if (isMobile()) {
-    [winSound, pinkSound].forEach(audio => {
-      audio.muted = true;
-      audio.play().then(() => {
-        audio.pause();
-        audio.currentTime = 0;
-        audio.muted = false;
-      }).catch(err => console.log("Mobile unlock blocked:", err));
+  [winSound, pinkSound].forEach(audio => {
+    audio.muted = true;
+    audio.play().then(() => {
+      audio.pause();
+      audio.currentTime = 0;
+      audio.muted = false;
     });
-  } else {
-    [winSound, pinkSound].forEach(audio => {
-      audio.load(); // desktop just preload
-    });
-  }
+  });
 
-  document.removeEventListener("touchstart", unlockAudioOnce);
-  document.removeEventListener("click", unlockAudioOnce);
-}
-document.addEventListener("touchstart", unlockAudioOnce);
-document.addEventListener("click", unlockAudioOnce);
+  document.getElementById("startOverlay").style.display = "none";
+});
 
+// Initialize
 window.addEventListener("resize", resizeCanvas);
 generateMaze();
 resizeCanvas();
