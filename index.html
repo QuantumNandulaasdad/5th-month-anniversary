@@ -215,37 +215,39 @@ canvas.addEventListener("touchend", e => {
   }
 });
 
-window.addEventListener("resize", resizeCanvas);
-generateMaze();
-resizeCanvas();
-drawMaze();
-
-// ✅ iOS/Chrome Mobile Audio Unlock
+// ✅ Hybrid audio unlock fix
+function isMobile() {
+  return /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+}
 function unlockAudioOnce() {
   const winSound = document.getElementById("winSound");
   const pinkSound = document.getElementById("pinkSound");
 
-  winSound.muted = true;
-  pinkSound.muted = true;
-
-  winSound.play().then(() => {
-    winSound.pause();
-    winSound.currentTime = 0;
-    winSound.muted = false;
-  });
-
-  pinkSound.play().then(() => {
-    pinkSound.pause();
-    pinkSound.currentTime = 0;
-    pinkSound.muted = false;
-  });
+  if (isMobile()) {
+    [winSound, pinkSound].forEach(audio => {
+      audio.muted = true;
+      audio.play().then(() => {
+        audio.pause();
+        audio.currentTime = 0;
+        audio.muted = false;
+      }).catch(err => console.log("Mobile unlock blocked:", err));
+    });
+  } else {
+    [winSound, pinkSound].forEach(audio => {
+      audio.load(); // desktop just preload
+    });
+  }
 
   document.removeEventListener("touchstart", unlockAudioOnce);
   document.removeEventListener("click", unlockAudioOnce);
 }
-
 document.addEventListener("touchstart", unlockAudioOnce);
 document.addEventListener("click", unlockAudioOnce);
+
+window.addEventListener("resize", resizeCanvas);
+generateMaze();
+resizeCanvas();
+drawMaze();
 </script>
 </body>
 </html>
