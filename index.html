@@ -219,6 +219,28 @@ window.addEventListener("resize", resizeCanvas);
 generateMaze();
 resizeCanvas();
 drawMaze();
+
+// ✅ Unlock audio on first user interaction (for mobile autoplay)
+function unlockAudio() {
+  const winSound = document.getElementById("winSound");
+  const pinkSound = document.getElementById("pinkSound");
+
+  [winSound, pinkSound].forEach(audio => {
+    audio.play().then(() => {
+      audio.pause();
+      audio.currentTime = 0;
+    }).catch(err => {
+      console.log("Autoplay blocked (expected on mobile):", err);
+    });
+  });
+
+  document.removeEventListener("touchstart", unlockAudio);
+  document.removeEventListener("click", unlockAudio);
+}
+
+document.addEventListener("touchstart", unlockAudio);
+document.addEventListener("click", unlockAudio);
+
 </script>
 </body>
 </html>
