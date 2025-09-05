@@ -220,27 +220,32 @@ generateMaze();
 resizeCanvas();
 drawMaze();
 
-// ✅ Unlock audio on first user interaction (for mobile autoplay)
-function unlockAudio() {
+// ✅ iOS/Chrome Mobile Audio Unlock
+function unlockAudioOnce() {
   const winSound = document.getElementById("winSound");
   const pinkSound = document.getElementById("pinkSound");
 
-  [winSound, pinkSound].forEach(audio => {
-    audio.play().then(() => {
-      audio.pause();
-      audio.currentTime = 0;
-    }).catch(err => {
-      console.log("Autoplay blocked (expected on mobile):", err);
-    });
+  winSound.muted = true;
+  pinkSound.muted = true;
+
+  winSound.play().then(() => {
+    winSound.pause();
+    winSound.currentTime = 0;
+    winSound.muted = false;
   });
 
-  document.removeEventListener("touchstart", unlockAudio);
-  document.removeEventListener("click", unlockAudio);
+  pinkSound.play().then(() => {
+    pinkSound.pause();
+    pinkSound.currentTime = 0;
+    pinkSound.muted = false;
+  });
+
+  document.removeEventListener("touchstart", unlockAudioOnce);
+  document.removeEventListener("click", unlockAudioOnce);
 }
 
-document.addEventListener("touchstart", unlockAudio);
-document.addEventListener("click", unlockAudio);
-
+document.addEventListener("touchstart", unlockAudioOnce);
+document.addEventListener("click", unlockAudioOnce);
 </script>
 </body>
 </html>
